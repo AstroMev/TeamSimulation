@@ -19,7 +19,7 @@ class ProjectLocus:
         self._num_meeting = num_meeting # 開催会議回数
         
         self._r = V0
-        self._theta_all = np.full((tt.size, self._num_member), np.pi/4) # 各時間の各メンバーの作業ベクトル角度
+        self._theta_all = np.full((tt.size, self._num_member), np.pi/2) # 各時間の各メンバーの作業ベクトル角度
         
         self._u_all = np.zeros((tt.size, self._num_member))    # 各メンバーの作業ベクトルx軸
         self._v_all = np.full((tt.size, self._num_member), V0) # 各メンバーの作業ベクトルy軸
@@ -46,7 +46,12 @@ class ProjectLocus:
                 self._u_all[i][m] = self._r * np.cos(self._theta_all[i-1][m])
                 self._v_all[i][m] = self._r * np.sin(self._theta_all[i-1][m])
 
+                if(abs(self._x_all[i-1]) >= 100): # グラフ外に出た場合
+                    self._theta_all[i][m] = np.pi - self._theta_all[i][m]
+                    self._u_all[i][m] = -1 * self._u_all[i][m]
+                
                 if(i % self._num_meeting == 0): # 会議開催の場合
+                    self._theta_all[i][m] = np.pi / 2.
                     self._u_all[i][m] = 0
                     self._v_all[i][m] = V0
                     self.next_flag = False
@@ -82,31 +87,40 @@ def MakeProgressAnim(fig, each_team_num_member, each_team_num_meeting):
     for t_i in pbar:
 
         ims_sum = []
+        stop_flag = True
+        
         for team_i in range(num_team):
             # 時刻tにおける質点と，時刻tに至るまでの運動の軌跡の二つの絵を作成し， アニメーション用のリストに格納する。
             im_p = plt.plot(Progress[team_i]._x_all[t_i], Progress[team_i]._y_all[t_i], 'o',
                             Progress[team_i]._x_all, Progress[team_i]._y_all,
                             '--', label='MTG:{} G:{}'.format(each_team_num_meeting[team_i], Progress[team_i]._goal_time),
                             color=cmap(team_i),markersize=10, linewidth = 2, aa=True)
-            
+
             im_q = plt.quiver(Progress[team_i]._x_all[t_i], Progress[team_i]._y_all[t_i],
-                              Progress[team_i]._u_all[t_i], Progress[team_i]._v_all[t_i],
+                              Progress[team_i]._u_all[t_i] * 2.5, Progress[team_i]._v_all[t_i] * 2.5,
                               color=cmap(team_i), angles='xy',scale_units='xy',scale=1)
 
             # タイトルテキスト
-            title = plt.text((xmin+xmax) /2 , xmax, 
-                             'Time : {:f}'.format(tt[t_i]+1),
-                             ha='center', va='bottom',fontsize=10)
+            title = plt.text(xmin, xmax, 
+                             'Time : {:.1f}'.format(tt[t_i]+1),
+                             ha='left', va='bottom',fontsize=10)
+
+            stop_flag = stop_flag and (Progress[team_i]._y_all[t_i] >= 100.)
             
             ims_sum += im_p + [im_q] + [title]
 
-        if flag_legend:#一回のみ凡例を描画
-            plt.legend()
+        if flag_legend: # 一回のみ凡例を描画
+            plt.legend(bbox_to_anchor=(1.04, 1), loc='upper left', borderaxespad=0)
             flag_legend = False
-        
+
         ims_all.append(ims_sum)
+        
+        if stop_flag: # 全てのグループがゴールしていたらアニメーション終了
+            break
 
     del Progress
+    # 右側の余白を調整
+    plt.subplots_adjust(right=0.7)
     anim = ArtistAnimation(fig, ims_all) # アニメーション作成
     return anim
 
@@ -118,9 +132,9 @@ if __name__ == '__main__':
     deltaT = 1.
     tt = np.arange(0., 100., deltaT) # 描画するための時間設定
     
-    V0 = 10. # 初速度の大きさ
-    g= 9.8 / 4 # 重力定数
-    each_team_num_member = [4, 4, 4] # 各チームメンバー数
+    V0 = 5. # メンバー１人の力
+    g= 1. # 重力定数
+    each_team_num_member = [10, 10, 10] # 各チームメンバー数
     each_team_num_meeting = [5., 12., 20.] # 各チーム会議回数
 
     # 描画のカスタマイズ    
@@ -130,11 +144,16 @@ if __name__ == '__main__':
     
     xmin = -100.
     xmax = 100.
-    anim = MakeProgressAnim(fig, each_team_num_member, each_team_num_meeting)
-    
-    plt.ylabel('Progress',fontsize=18)
+
+    plt.title('{} members'.format(each_team_num_member[0]))
+    plt.ylabel('Progress [%]',fontsize=18)
+
     plt.xlim(xmin, xmax)
     plt.ylim(-10, 110)
+    
     plt.hlines([0], xmin, xmax, linestyles="-")  # y=0に線を描く。
+    plt.hlines([100], xmin, xmax, colors='r', linestyles="dashed")  # y=0に線を描く。
+    
+    anim = MakeProgressAnim(fig, each_team_num_member, each_team_num_meeting)
     
     anim.save("Result.gif", writer='imagemagick')   # gifアニメーションファイルを作成する
