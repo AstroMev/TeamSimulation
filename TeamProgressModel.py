@@ -91,11 +91,19 @@ def MakeProgressAnim(fig, each_team_num_member, each_team_num_meeting):
         
         for team_i in range(num_team):
             # 時刻tにおける質点と，時刻tに至るまでの運動の軌跡の二つの絵を作成し， アニメーション用のリストに格納する。
-            im_p = plt.plot(Progress[team_i]._x_all[t_i], Progress[team_i]._y_all[t_i], 'o',
-                            Progress[team_i]._x_all, Progress[team_i]._y_all,
-                            '--', label='MTG:{} G:{}'.format(each_team_num_meeting[team_i], Progress[team_i]._goal_time),
-                            color=cmap(team_i),markersize=10, linewidth = 2, aa=True)
-
+            #im_p = plt.plot(Progress[team_i]._x_all[t_i], Progress[team_i]._y_all[t_i], 'o',
+            #                Progress[team_i]._x_all, Progress[team_i]._y_all,
+            #                '--', label='MTG:{} G:{}'.format(each_team_num_meeting[team_i], Progress[team_i]._goal_time),
+            #                color=cmap(team_i),markersize=10, linewidth = 2, aa=True)
+            
+            im_p = plt.plot(Progress[team_i]._x_all[t_i], Progress[team_i]._y_all[t_i], marker='o',
+                            label='MTG:{}\nGOAL:{}'.format(each_team_num_meeting[team_i], Progress[team_i]._goal_time),
+                            color=cmap(team_i), markersize=10, aa=True)
+            
+            im_l = plt.plot(Progress[team_i]._x_all, Progress[team_i]._y_all, '--',
+                            #label='GOAL:{}'.format(Progress[team_i]._goal_time),
+                            color=cmap(team_i), linewidth=2, aa=True)
+            
             im_q = plt.quiver(Progress[team_i]._x_all[t_i], Progress[team_i]._y_all[t_i],
                               Progress[team_i]._u_all[t_i] * 2.5, Progress[team_i]._v_all[t_i] * 2.5,
                               color=cmap(team_i), angles='xy',scale_units='xy',scale=1)
