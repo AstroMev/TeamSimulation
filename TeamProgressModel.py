@@ -17,12 +17,17 @@ class ProjectLocus:
     def __init__(self, num_member, num_meeting):
         self._num_member = num_member # チームメンバー数
         self._num_meeting = num_meeting # 開催会議回数
+
+        self._g = 1. # 後戻りの力
+
+        self._deltaT = 1.
+        self._tt = np.arange(0., 100., self._deltaT) # 描画するための時間設定
+    
+        self._r = 5. # メンバー１人の力
+        self._theta_all = np.full((self._tt.size, self._num_member), np.pi/2) # 各時間の各メンバーの作業ベクトル角度
         
-        self._r = V0
-        self._theta_all = np.full((tt.size, self._num_member), np.pi/2) # 各時間の各メンバーの作業ベクトル角度
-        
-        self._u_all = np.zeros((tt.size, self._num_member))    # 各メンバーの作業ベクトルx軸
-        self._v_all = np.full((tt.size, self._num_member), V0) # 各メンバーの作業ベクトルy軸
+        self._u_all = np.zeros((self._tt.size, self._num_member))    # 各メンバーの作業ベクトルx軸
+        self._v_all = np.full((self._tt.size, self._num_member), self._r) # 各メンバーの作業ベクトルy軸
         
         self._x_all = [0.] # 各時間のチーム進捗位置X軸
         self._y_all = [0.] # 各時間のチーム進捗位置Y軸
@@ -34,11 +39,11 @@ class ProjectLocus:
     
     def calc_locus(self):
         
-        for i in range(len(tt)):
+        for i in range(len(self._tt)):
             if(i == 0):
                 continue
 
-            self.next_flag = True
+            self._next_flag = True
             for m in range(self._num_member):
 
                 self._theta_all[i][m] = self._theta_all[i-1][m] + (np.random.randn() * np.pi/12)
@@ -53,19 +58,19 @@ class ProjectLocus:
                 if(i % self._num_meeting == 0): # 会議開催の場合
                     self._theta_all[i][m] = np.pi / 2.
                     self._u_all[i][m] = 0
-                    self._v_all[i][m] = V0
-                    self.next_flag = False
+                    self._v_all[i][m] = self._r
+                    self._next_flag = False
                     
                 if(self._y_all[i-1] >= 100.): # プロジェクト完了の場合
                     self._u_all[i][m] = 0
                     self._v_all[i][m] = 0
-                    self.next_flag = False
+                    self._next_flag = False
                     
-                    if(self._goal_time > tt[i]): # ゴール時刻の記録
-                        self._goal_time = tt[i]
+                    if(self._goal_time > self._tt[i]): # ゴール時刻の記録
+                        self._goal_time = self._tt[i]
 
-            self._x = self._u_all[i][m]*deltaT + self._x_all[i-1]  # x(t)の記述
-            self._y = ( -(g/2)*deltaT**2 + self._v_all[i][m]*deltaT ) * self.next_flag + self._y_all[i-1] # y(t)の記述
+            self._x = self._u_all[i][m]*self._deltaT + self._x_all[i-1]  # x(t)の記述
+            self._y = ( -(self._g/2)*self._deltaT**2 + self._v_all[i][m]*self._deltaT ) * self._next_flag + self._y_all[i-1] # y(t)の記述
             
             self._x_all.append(self._x) # xの時々刻々データを格納
             self._y_all.append(self._y) # yの時々刻々データを格納
@@ -83,7 +88,7 @@ def MakeProgressAnim(fig, each_team_num_member, each_team_num_meeting):
 
     ims_all = []
     flag_legend = True
-    pbar = tqdm(range(len(tt)))
+    pbar = tqdm(range(len(Progress[0]._tt)))
     for t_i in pbar:
 
         ims_sum = []
@@ -110,7 +115,7 @@ def MakeProgressAnim(fig, each_team_num_member, each_team_num_meeting):
 
             # タイトルテキスト
             title = plt.text(xmin, xmax, 
-                             'Time : {:.1f}'.format(tt[t_i]+1),
+                             'Time : {:.1f}'.format(Progress[0]._tt[t_i] + 1),
                              ha='left', va='bottom',fontsize=10)
 
             stop_flag = stop_flag and (Progress[team_i]._y_all[t_i] >= 100.)
@@ -137,11 +142,11 @@ if __name__ == '__main__':
 
     anim = [] #アニメーション用に描くパラパラ図のデータを格納するためのリスト
 
-    deltaT = 1.
-    tt = np.arange(0., 100., deltaT) # 描画するための時間設定
+    #deltaT = 1.
+    #tt = np.arange(0., 100., deltaT) # 描画するための時間設定
     
-    V0 = 5. # メンバー１人の力
-    g= 1. # 重力定数
+    #V0 = 5. # メンバー１人の力
+    #g= 1. # 重力定数
     each_team_num_member = [10, 10, 10] # 各チームメンバー数
     each_team_num_meeting = [5., 12., 20.] # 各チーム会議回数
 
