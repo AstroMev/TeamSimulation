@@ -12,6 +12,7 @@
 
 そこで、適切な会議数を提案するためのチーム運営シミュレータを作ってみました。  
 まずは"Result.gif"をご覧下さい。
+![Result](https://user-images.githubusercontent.com/35166412/65834551-0b9b7080-e317-11e9-8eee-fd868c15c6b9.gif)
 
 このモデルは一言でいうと、  
 **「大玉転がし大会」**  
