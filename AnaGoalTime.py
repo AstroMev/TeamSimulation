@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 if __name__ == '__main__':
     num_member = 5
-    num_team = 2000
+    num_team = 5000
     
     goal_data1 = [0] * num_team
     goal_data2 = [0] * num_team
@@ -33,8 +33,8 @@ if __name__ == '__main__':
     plt.ylabel('Frequency',fontsize=18)
     plt.xlim(0.5, 100.5)
 
-    plt.hist(goal_data1, bins=20, alpha=0.4, histtype='stepfilled', color='r', label='MTG:{}'.format(freq_meeting1), range=(0.5, 100.5))
-    plt.hist(goal_data2, bins=20, alpha=0.4, histtype='stepfilled', color='g', label='MTG:{}'.format(freq_meeting2), range=(0.5, 100.5))
+    plt.hist(goal_data1, bins=20, alpha=0.6, histtype='stepfilled', color='r', label='MTG:{}'.format(freq_meeting1), range=(0.5, 100.5))
+    plt.hist(goal_data2, bins=20, alpha=0.6, histtype='stepfilled', color='g', label='MTG:{}'.format(freq_meeting2), range=(0.5, 100.5))
     
     plt.legend()
     plt.savefig('Result_AnaGoalTime.png')
