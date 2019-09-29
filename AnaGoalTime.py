@@ -11,24 +11,30 @@ from tqdm import tqdm
 
 if __name__ == '__main__':
     num_member = 5
-    freq_meeting = 10
-    num_team = 1000
+    num_team = 2000
     
-    goal_data = [0] * num_team
-    
-    pbar = tqdm(range(len(goal_data)))
+    goal_data1 = [0] * num_team
+    goal_data2 = [0] * num_team
+
+    freq_meeting1 = 5
+    pbar = tqdm(range(len(goal_data1)))
     for i in pbar:
-        goal_data[i] = TPM.ProjectLocus(num_member, freq_meeting)._goal_time
-        
+        goal_data1[i] = TPM.ProjectLocus(num_member, freq_meeting1)._goal_time
+
+    freq_meeting2 = 20
+    pbar = tqdm(range(len(goal_data1)))
+    for i in pbar:
+        goal_data2[i] = TPM.ProjectLocus(num_member, freq_meeting2)._goal_time
+    
     sns.set()
     
-    plt.title('{} members, {} meetings/time'.format(num_member, freq_meeting))
+    plt.title('{} members'.format(num_member))
     plt.xlabel('Goal time',fontsize=18)
     plt.ylabel('Frequency',fontsize=18)
     plt.xlim(0.5, 100.5)
 
-    edges = [x+0.5 for x in range(101)]
-    plt.hist(goal_data, bins=edges)
-
-    #plt.show()
+    plt.hist(goal_data1, bins=20, alpha=0.4, histtype='stepfilled', color='r', label='MTG:{}'.format(freq_meeting1), range=(0.5, 100.5))
+    plt.hist(goal_data2, bins=20, alpha=0.4, histtype='stepfilled', color='g', label='MTG:{}'.format(freq_meeting2), range=(0.5, 100.5))
+    
+    plt.legend()
     plt.savefig('Result_AnaGoalTime.png')
