@@ -8,6 +8,9 @@ import seaborn as sns
 
 from tqdm import tqdm
 
+"""
+モデルを使用してゴール時刻のヒストグラムを作成
+"""
 
 if __name__ == '__main__':
     num_member = 5
